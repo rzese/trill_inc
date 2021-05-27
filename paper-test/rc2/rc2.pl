@@ -1,0 +1,14 @@
+subClassOf(b0,intersectionOf([p1,q1])).
+annotationAssertion('disponte:probability',subClassOf(b0,intersectionOf([p1,q1])),literal('0.052553273773452425')).
+subClassOf(p1,b1).
+annotationAssertion('disponte:probability',subClassOf(p1,b1),literal('0.9748036005524913')).
+subClassOf(q1,b1).
+annotationAssertion('disponte:probability',subClassOf(q1,b1),literal('0.7459124505799963')).
+subClassOf(b1,intersectionOf([p2,q2])).
+annotationAssertion('disponte:probability',subClassOf(b1,intersectionOf([p2,q2])),literal('0.5725025873301859')).
+subClassOf(p2,b2).
+annotationAssertion('disponte:probability',subClassOf(p2,b2),literal('0.4647295898460089')).
+subClassOf(q2,b2).
+annotationAssertion('disponte:probability',subClassOf(q2,b2),literal('0.1601256860651442')).
+classAssertion(b0,x).
+annotationAssertion('disponte:probability',classAssertion(b0,x),literal('0.7154839746461128')).
