@@ -289,18 +289,12 @@ find_n_explanations_time_limit(M,QueryType,QueryArgs,Expl,MonitorNExpl,MonitorTi
 find_single_explanation(M,QueryType,QueryArgs,Expl,Opt):-
   set_up_reasoner(M),
   build_abox(M,Tableau,QueryType,QueryArgs), % will expand the KB without the query
-  (absence_of_clashes(Tableau) ->  % TODO if QueryType is inconsistent no check
-    (
-      add_q(M,QueryType,Tableau,QueryArgs,Tableau0),
-      set_up_tableau(M),
-      findall(Tableau1,expand_queue(M,Tableau0,Tableau1),L),
-      (query_option(Opt,assert_abox,true) -> (writeln('Asserting ABox...'), M:assert(final_abox(L)), writeln('Done. Asserted in final_abox/1...')) ; true),
-      find_expls(M,L,QueryArgs,Expl1),
-      check_and_close(M,Expl1,Expl)
-    )
-  ;
-    print_message(warning,inconsistent),!,false
-  ).
+  add_q(M,QueryType,Tableau,QueryArgs,Tableau0),
+  set_up_tableau(M),
+  findall(Tableau1,expand_queue(M,Tableau0,Tableau1),L),
+  (query_option(Opt,assert_abox,true) -> (writeln('Asserting ABox...'), M:assert(final_abox(L)), writeln('Done. Asserted in final_abox/1...')) ; true),
+  find_expls(M,L,QueryArgs,Expl1),
+  check_and_close(M,Expl1,Expl).
 
 /*************
  
@@ -2022,31 +2016,31 @@ ch_rule(M,Tab0,[exactCardinality(N,S,C),Ind1],L):-
   dif(L,[]),
   create_choice_point(M,Ind2,ch,exactCardinality(N,S,C),[C,NC],_),!. % last variable whould be equals to ID
 
-  ch_rule(M,Tab0,[S,Ind1,Ind2],L):-
-    get_abox(Tab0,ABox),
-    findClassAssertion(maxCardinality(N,S,C),Ind1,Expl1,ABox),
-    \+ indirectly_blocked(Ind1,Tab0),
-    findPropertyAssertion(S,Ind1,Ind2,Expl2,ABox),
-    absent_c_not_c(Ind2,C,ABox),
-    and_f(M,Expl1,Expl2,Expl),
-    get_choice_point_id(M,ID),%gtrace,
-    neg_class(C,NC),
-    scan_or_list(M,[C,NC],0,ID,Ind2,Expl,Tab0,L),
-    dif(L,[]),
-    create_choice_point(M,Ind2,ch,maxCardinality(N,S,C),[C,NC],_),!. % last variable whould be equals to ID
-  
-  ch_rule(M,Tab0,[S,Ind1,Ind2],L):-
-    get_abox(Tab0,ABox),
-    findClassAssertion(exactCardinality(N,S,C),Ind1,Expl1,ABox),
-    \+ indirectly_blocked(Ind1,Tab0),
-    findPropertyAssertion(S,Ind1,Ind2,Expl2,ABox),
-    absent_c_not_c(Ind2,C,ABox),
-    and_f(M,Expl1,Expl2,Expl),
-    get_choice_point_id(M,ID),%gtrace,
-    neg_class(C,NC),
-    scan_or_list(M,[C,NC],0,ID,Ind2,Expl,Tab0,L),
-    dif(L,[]),
-    create_choice_point(M,Ind2,ch,exactCardinality(N,S,C),[C,NC],_),!. % last variable whould be equals to ID
+ch_rule(M,Tab0,[S,Ind1,Ind2],L):-
+  get_abox(Tab0,ABox),
+  findClassAssertion(maxCardinality(N,S,C),Ind1,Expl1,ABox),
+  \+ indirectly_blocked(Ind1,Tab0),
+  findPropertyAssertion(S,Ind1,Ind2,Expl2,ABox),
+  absent_c_not_c(Ind2,C,ABox),
+  and_f(M,Expl1,Expl2,Expl),
+  get_choice_point_id(M,ID),%gtrace,
+  neg_class(C,NC),
+  scan_or_list(M,[C,NC],0,ID,Ind2,Expl,Tab0,L),
+  dif(L,[]),
+  create_choice_point(M,Ind2,ch,maxCardinality(N,S,C),[C,NC],_),!. % last variable whould be equals to ID
+
+ch_rule(M,Tab0,[S,Ind1,Ind2],L):-
+  get_abox(Tab0,ABox),
+  findClassAssertion(exactCardinality(N,S,C),Ind1,Expl1,ABox),
+  \+ indirectly_blocked(Ind1,Tab0),
+  findPropertyAssertion(S,Ind1,Ind2,Expl2,ABox),
+  absent_c_not_c(Ind2,C,ABox),
+  and_f(M,Expl1,Expl2,Expl),
+  get_choice_point_id(M,ID),%gtrace,
+  neg_class(C,NC),
+  scan_or_list(M,[C,NC],0,ID,Ind2,Expl,Tab0,L),
+  dif(L,[]),
+  create_choice_point(M,Ind2,ch,exactCardinality(N,S,C),[C,NC],_),!. % last variable whould be equals to ID
 
 %---------------------
 
@@ -3065,26 +3059,30 @@ add_all_to_tableau(M,L,Tableau0,Tableau):-
 
 add_all_to_abox_and_clashes(_,[],_,A,A,C,C).
 
-add_all_to_abox_and_clashes(M,[(classAssertion(C,I),Expl)|T],Tab,A0,A,C0,C):-
-  check_clash(M,C-I,Tab),!,
-  add_to_abox(A0,(classAssertion(C,I),Expl),A1),
-  add_to_clashes(C0,C-I,C1),
-  add_all_to_abox_and_clashes(M,T,A1,A,C1,C).
+add_all_to_abox_and_clashes(M,[(classAssertion(Class,I),Expl)|T],Tab0,A0,A,C0,C):-
+  check_clash(M,Class-I,Tab0),!,
+  add_to_abox(A0,(classAssertion(Class,I),Expl),A1),
+  add_to_clashes(C0,Class-I,C1),
+  set_abox(Tab0,A1,Tab),
+  add_all_to_abox_and_clashes(M,T,Tab,A1,A,C1,C).
 
-add_all_to_abox_and_clashes(M,[(sameIndividual(LI),Expl)|T],Tab,A0,A,C0,C):-
-  check_clash(M,sameIndividual(LI),Tab),!,
+add_all_to_abox_and_clashes(M,[(sameIndividual(LI),Expl)|T],Tab0,A0,A,C0,C):-
+  check_clash(M,sameIndividual(LI),Tab0),!,
   add_to_abox(A0,(sameIndividual(LI),Expl),A1),
   add_to_clashes(C0,sameIndividual(LI),C1),
-  add_all_to_abox_and_clashes(M,T,A1,A,C1,C).
+  set_abox(Tab0,A1,Tab),
+  add_all_to_abox_and_clashes(M,T,Tab,A1,A,C1,C).
 
-add_all_to_abox_and_clashes(M,[(differentIndividuals(LI),Expl)|T],Tab,A0,A,C0,C):-
-  check_clash(M,differentIndividuals(LI),Tab),!,
+add_all_to_abox_and_clashes(M,[(differentIndividuals(LI),Expl)|T],Tab0,A0,A,C0,C):-
+  check_clash(M,differentIndividuals(LI),Tab0),!,
   add_to_abox(A0,(differentIndividuals(LI),Expl),A1),
   add_to_clashes(C0,differentIndividuals(LI),C1),
-  add_all_to_abox_and_clashes(M,T,A1,A,C1,C).
+  set_abox(Tab0,A1,Tab),
+  add_all_to_abox_and_clashes(M,T,Tab,A1,A,C1,C).
 
-add_all_to_abox_and_clashes(M,[H|T],Tab,A0,A,C0,C):-
+add_all_to_abox_and_clashes(M,[H|T],Tab0,A0,A,C0,C):-
   add_to_abox(A0,H,A1),
+  set_abox(Tab0,A1,Tab),
   add_all_to_abox_and_clashes(M,T,Tab,A1,A,C0,C).
 
 add_all_to_abox([],A,A).
