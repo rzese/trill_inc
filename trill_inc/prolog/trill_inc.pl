@@ -217,6 +217,9 @@ prolog:message(wrong_number_max_expl) -->
 prolog:message(timeout_reached) -->
   [ 'Timeout reached' ].
 
+prolog:message(repairs(RepairSem)) -->
+  [ 'Repair Semantics: ~w' -[RepairSem] ].
+
 /*****************************
   QUERY OPTIONS
 ******************************/
@@ -248,7 +251,12 @@ execute_query(M,QueryType,QueryArgsNC,ExplOut,QueryOptions):-
       (dif(IncCheck,false) -> print_message(warning,completely_inconsistent) ; true),
       ( query_option(QueryOptions,return_incons_expl,Inc) -> true ; true) % does nothing, just unifies with the variable in the option
     )
-    ; true
+    ; ( query_option(QueryOptions,max_expl,all) -> 
+        (
+          compute_repair_semantics(M,ExplIncP,RepairSem),
+          print_message(information,repairs(RepairSem))
+        ) ; true
+      )
   ).
 
 
@@ -952,7 +960,7 @@ clash(M,C-sameIndividual(L1),Tab,Expl):-
   member(Ind2,L1),
   and_f(M,Expl1,Expl2,Expl).
 
-clash(M,C1-Ind,Tab,Expl):-
+clash(M,C1-Ind,Tab,Expl):-%trace,
   get_abox(Tab,ABox),
   %write('clash 7'),nl,
   M:disjointClasses(L), % TODO use hierarchy
@@ -2699,7 +2707,8 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
   assert(rule_n(0)),
   %findall(1,M:annotationAssertion('http://ml.unife.it/disponte#probability',_,_),NAnnAss),length(NAnnAss,NV),
   get_bdd_environment(M,Env),
-  build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDC),
+  build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,Rep),
+  print_message(information,repairs(Rep)),
   ret_prob(Env,BDDQC,ProbQC),
   ret_prob(Env,BDDC,ProbC),
   (dif(ProbC,0.0) -> 
@@ -2709,6 +2718,16 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
   ),
   clean_environment(M,Env), !.
 /**/
+% COMMENT: compute repair semantics
+compute_repair_semantics(M,expl{expl:Expl,incons:Inc},RepairSem):-
+  retractall(v(_,_,_)),
+  retractall(na(_,_)),
+  retractall(rule_n(_)),
+  assert(rule_n(0)),
+  %findall(1,M:annotationAssertion('http://ml.unife.it/disponte#probability',_,_),NAnnAss),length(NAnnAss,NV),
+  get_bdd_environment(M,Env),
+  check_repair_semantics(M,Env,Expl,Inc,RepairSem),!.
+
 
 get_var_n(Env,R,S,Probs,V):-
   (
@@ -2721,8 +2740,8 @@ get_var_n(Env,R,S,Probs,V):-
   ).
 
 
-get_prob_ax(M,(Ax,_Ind),N,Prob):- !,
-  compute_prob_ax(M,Ax,Prob),
+get_prob_ax(M,(Ax,_Ind),N,1,Prob):- !,
+  compute_prob_ax(M,Ax,Prob),!,
   ( na(Ax,N) ->
       true
     ;
@@ -2731,9 +2750,9 @@ get_prob_ax(M,(Ax,_Ind),N,Prob):- !,
       retract(rule_n(N)),
       N1 is N + 1,
       assert(rule_n(N1))
-  ).
-get_prob_ax(M,Ax,N,Prob):- !,
-  compute_prob_ax(M,Ax,Prob),
+  ),!.
+get_prob_ax(M,Ax,N,1,Prob):- !,
+  compute_prob_ax(M,Ax,Prob),!,
   ( na(Ax,N) ->
       true
     ;
@@ -2742,7 +2761,28 @@ get_prob_ax(M,Ax,N,Prob):- !,
       retract(rule_n(N)),
       N1 is N + 1,
       assert(rule_n(N1))
-  ).
+  ),!.
+
+get_prob_ax(_M,(Ax,_Ind),N,0,[1.0,0.0]):- !,
+  ( na(Ax,N) ->
+      true
+    ;
+      rule_n(N),
+      assert(na(Ax,N)),
+      retract(rule_n(N)),
+      N1 is N + 1,
+      assert(rule_n(N1))
+  ),!.
+get_prob_ax(_M,Ax,N,0,[1.0,0.0]):- !,
+  ( na(Ax,N) ->
+      true
+    ;
+      rule_n(N),
+      assert(na(Ax,N)),
+      retract(rule_n(N)),
+      N1 is N + 1,
+      assert(rule_n(N1))
+  ),!.
 
 prob_number(ProbAT,ProbA):-
   atom_number(ProbAT,ProbAC),
@@ -2759,11 +2799,15 @@ prob_number(ProbAT,ProbA):-
 prob_number(ProbAT,ProbA):-
   atom_number(ProbAT,ProbA).
 
-compute_prob_ax(M,Ax,Prob):-
+compute_prob_ax(M,Ax,[Prob,ProbN]):-
   findall(ProbA,(M:annotationAssertion('https://sites.google.com/a/unife.it/ml/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsOld), % Retro-compatibility
   findall(ProbA,(M:annotationAssertion('http://ml.unife.it/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsNew),
   append(ProbsNew, ProbsOld, Probs),
-  compute_prob_ax1(Probs,Prob).
+  compute_prob_ax1(Probs,Prob),!,
+  ProbN is 1-Prob,!.
+
+% No probability axioms
+%compute_prob_ax(_,_,nop).
 
 compute_prob_ax1([Prob],Prob):-!.
 

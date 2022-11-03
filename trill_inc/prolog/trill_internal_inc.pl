@@ -872,12 +872,13 @@ clean_environment(_M,Env):-
 
 % COMMENT: added predicates to build the BDDs correctly
 /**/
-build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDC):- !,
-  build_bdd(M,Env,Expl,BDDQ), % BDD query's explanations
-  build_bdd(M,Env,Inc,BDDInc), % BDD inconsistency's explanations
+build_bdd_inc(M,Env,Expl,Inc,P,BDDQC,BDDC):- !,
+  build_bdd(M,Env,Expl,P,BDDQ), % BDD query's explanations
+  build_bdd(M,Env,Inc,P,BDDInc), % BDD inconsistency's explanations
   bdd_not(Env,BDDInc,BDDC), % BDD consistency's explanations
   and(Env,BDDQ,BDDC,BDDQC). % BDD query and consistency's explanations
 
+/*
 build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDNQC,BDDC):- !,
   build_bdd(M,Env,Expl,BDDQ), % BDD query's explanations
   build_bdd(M,Env,Inc,BDDInc), % BDD inconsistency's explanations
@@ -885,38 +886,174 @@ build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDNQC,BDDC):- !,
   bdd_not(Env,BDDQ,BDDNQ), % BDD for the query to be false
   and(Env,BDDQ,BDDC,BDDQC), % BDD query and consistency's explanations
   and(Env,BDDNQ,BDDC,BDDNQC). % BDD of query not true in consistent worlds
+*/
+
+build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RepairSem):- !,
+  build_bdd_inc(M,Env,Expl,Inc,1,BDDQC,BDDC),
+  check_repair_semantics(M,Env,Expl,Inc,RepairSem),!.
+
+check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
+  extract_assertions(Expl,Causes),
+  extract_assertions(Inc,Conflicts),
+  check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!.
+
+% Brave: BDDQC tells me that, if 0, the query is not Brave-entailed, and so, it is not repair-entailed
+check_repair_answer(M,Env,Causes,Conflicts,'false'):-
+  build_bdd_inc(M,Env,Causes,Conflicts,0,BDDQCI,_BDDCI),
+  zero(Env,BDDQCI),!.
+
+% IAR
+check_repair_answer(_M,_Env,Causes,Conflicts,'IAR'):-
+  check_IAR(Causes,Conflicts,1),!.
+
+% AR
+check_repair_answer(M,Env,Causes,Conflicts,'AR'):-
+  build_bdd_conflicts(M,Env,Conflicts,ConfSet,BDDCD),
+  build_bdd_not_q(M,Env,Causes,ConfSet,BDDNQ),
+  bdd_not(Env,BDDCD,BDDCons),
+  and(Env,BDDNQ,BDDCons,BDDAR),
+  zero(Env,BDDAR).
+
+
+% Brave: else if not 0, there is at least one justification true
+check_repair_answer(_M,_Env,_Causes,_Conflict,'Brave'):- !.
+
+
+check_IAR(Expl,Inc,IAR):-
+  flatten(Inc,IncF),
+  check_IAR_int(Expl,IncF,IAR).
+
+check_IAR_int([H|T],Inc,IAR):-
+  ((memberchk(A,H),memberchk(A,Inc),!) -> check_IAR_int(T,Inc,IAR) ; IAR=1),!.
+
+check_IAR_int([],_,0).
+
+  
+
+extract_assertions([],[]):-!.
+extract_assertions([H|T],[HA|T1]):-
+  extract_assertions_int(H,HA),
+  extract_assertions(T,T1).
+extract_assertions_int([],[]):-!.
+extract_assertions_int([H|T],[H|T1]):-
+  is_assertion(H),!,
+  extract_assertions_int(T,T1).
+extract_assertions_int([_|T],T1):-!,
+  extract_assertions_int(T,T1).
+
+is_assertion(sameIndividual(_)):-!.
+is_assertion(differentIndividuals(_)):-!.
+is_assertion(classAssertion(_,_)):-!.
+is_assertion(propertyAssertion(_,_,_)):-!.
+is_assertion(negativePropertyAssertion(_,_,_)):-!.
+
 /**/
 
-build_bdd(M,Env,[X],BDD):- !,
-  bdd_and(M,Env,X,BDD).
+build_bdd(M,Env,[X],P,BDD):- !,
+  bdd_and(M,Env,X,P,BDD).
 
-build_bdd(M,Env, [H|T],BDD):-
-  build_bdd(M,Env,T,BDDT),
-  bdd_and(M,Env,H,BDDH),
+build_bdd(M,Env, [H|T],P,BDD):-
+  build_bdd(M,Env,T,P,BDDT),
+  bdd_and(M,Env,H,P,BDDH),
   or(Env,BDDH,BDDT,BDD).
 
-build_bdd(_M,Env,[],BDD):- !,
+build_bdd(_M,Env,[],_P,BDD):- !,
   zero(Env,BDD).
 
 
-bdd_and(M,Env,[X],BDDX):-
-  get_prob_ax(M,X,AxN,Prob),!,
-  ProbN is 1-Prob,
-  get_var_n(Env,AxN,[],[Prob,ProbN],VX),
+bdd_and(M,Env,[X],P,BDDX):-
+  get_prob_ax(M,X,AxN,P,Prob),!,
+  get_var_n(Env,AxN,[],Prob,VX),
   equality(Env,VX,0,BDDX),!.
 
-bdd_and(_M,Env,[_X],BDDX):- !,
+bdd_and(_M,Env,[_X],_P,BDDX):- !,
   one(Env,BDDX).
 
-bdd_and(M,Env,[H|T],BDDAnd):-
-  get_prob_ax(M,H,AxN,Prob),!,
-  ProbN is 1-Prob,
-  get_var_n(Env,AxN,[],[Prob,ProbN],VH),
+bdd_and(M,Env,[H|T],P,BDDAnd):-
+  get_prob_ax(M,H,AxN,P,Prob),!,  
+  get_var_n(Env,AxN,[],Prob,VH),
   equality(Env,VH,0,BDDH),
-  bdd_and(M,Env,T,BDDT),
+  bdd_and(M,Env,T,P,BDDT),
   and(Env,BDDH,BDDT,BDDAnd).
   
-bdd_and(M,Env,[_H|T],BDDAnd):- !,
+bdd_and(M,Env,[_H|T],P,BDDAnd):- !,
   one(Env,BDDH),
-  bdd_and(M,Env,T,BDDT),
+  bdd_and(M,Env,T,P,BDDT),
   and(Env,BDDH,BDDT,BDDAnd).
+
+
+
+build_bdd_conflicts(M,Env,[X],Conf,BDD):- !,
+  bdd_or(M,Env,X,ConfV,BDD),
+  add_conflicts_to_conf_dict(Env,conf{},ConfV,Conf).
+
+build_bdd_conflicts(M,Env, [H|T],Conf,BDD):-
+  build_bdd_conflicts(M,Env,T,Conf0,BDDT),
+  bdd_or(M,Env,H,ConfV,BDDH),
+  and(Env,BDDH,BDDT,BDD),
+  add_conflicts_to_conf_dict(Env,Conf0,ConfV,Conf).
+
+build_bdd_conflicts(_M,Env,[],conf{},BDD):- !,
+  one(Env,BDD).
+
+
+bdd_or(M,Env,[X],[VX],BDDX):-
+  get_prob_ax(M,X,AxN,0,Prob),!,
+  get_var_n(Env,AxN,[],Prob,VX),
+  equality(Env,VX,0,BDDX),!.
+
+bdd_or(M,Env,[H|T],[VH|TV],BDDAnd):-
+  get_prob_ax(M,H,AxN,0,Prob),!,  
+  get_var_n(Env,AxN,[],Prob,VH),
+  equality(Env,VH,0,BDDH),
+  bdd_or(M,Env,T,TV,BDDT),
+  or(Env,BDDH,BDDT,BDDAnd).
+  
+
+add_conflicts_to_conf_dict(Env,Conf0,ConfV,Conf):-
+  findall(I-J, (member(I,ConfV), member(J,ConfV), I<J), Pairs),
+  add_pairs(Env,Conf0,Pairs,Conf).
+
+add_pairs(_Env,Conf,[],Conf):-!.
+
+add_pairs(Env,Conf0,[A-B|T],Conf):-
+  add_conf(Env,Conf0,A,B,Conf1),
+  add_pairs(Env,Conf1,T,Conf).
+
+add_conf(Env,Conf0,A,B,Conf):-
+  add_conf_el(Env,Conf0,A,B,Conf1),
+  add_conf_el(Env,Conf1,B,A,Conf).
+
+add_conf_el(Env,Conf0,A,B,Conf):-
+  X=Conf0.get(A),
+  !,
+  or(Env,X,B,XB),
+  Conf = Conf0.put(A,XB).
+
+add_conf_el(Env,Conf0,A,B,Conf):-!,
+  equality(Env,B,0,BDDB),
+  Conf = Conf0.put(A,BDDB).
+
+build_bdd_not_q(_M,Env,[],_ConfSet,BDDNQ):-!,
+  one(Env,BDDNQ).
+
+build_bdd_not_q(M,Env,[H|T],ConfSet,BDDNQ):-
+  or_causes_conflicts(Env,H,ConfSet,BDDH),
+  build_bdd_not_q(M,Env,T,ConfSet,BDDT),
+  and(Env,BDDH,BDDT,BDDNQ).
+
+or_causes_conflicts(Env,[],_ConfSet,BDD):-!,
+  zero(Env,BDD).
+
+or_causes_conflicts(Env,[H|T],ConfSet,BDD):-
+  get_prob_ax(_M,H,HN,0,Prob),!,
+  get_var_n(Env,HN,[],Prob,VH),
+  get_bdd_from_confset(Env,ConfSet,VH,BDDH),!,
+  or_causes_conflicts(Env,T,ConfSet,BDDT),
+  or(Env,BDDT,BDDH,BDD).
+
+get_bdd_from_confset(_Env,ConfSet,VH,BDDH):-
+  BDDH = ConfSet.VH,!.
+
+get_bdd_from_confset(Env,_ConfSet,VH,BDDH):-
+  equality(Env,VH,0,BDDH),!.
