@@ -4,16 +4,22 @@
 
 /** <examples>
 
-?- instanceOf(sem,a,E).
-?- prob_instanceOf(sem,a,Prob).
-?- instanceOf(univEmpl,a,E).
+% IAR
+?- prob_instanceOf(person,a,Prob).
+% AR
 ?- prob_instanceOf(univEmpl,a,Prob).
+% Brave
+?- prob_instanceOf(dott,a,Prob).
+% false
+?- prob_instanceOf(sem,a,Prob).
 
 */
 
 classAssertion(pr,a).
 classAssertion(phd,a).
+classAssertion(person,a).
 subClassOf(intersectionOf([pr,phd]),sem).
+subClassOf(intersectionOf([person,phd]),dott).
 subClassOf(unionOf([pr,phd]),univEmpl).
 disjointClasses([pr,phd]).
 annotationAssertion('disponte:probability',classAssertion(pr,a),literal('0.2')).

@@ -894,7 +894,7 @@ build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RepairSem):- !,
 
 check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
   extract_assertions(Expl,Causes),
-  extract_assertions(Inc,Conflicts),
+  extract_assertions(Inc,Conflicts),%gtrace,
   check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!.
 
 % Brave: BDDQC tells me that, if 0, the query is not Brave-entailed, and so, it is not repair-entailed
@@ -904,15 +904,14 @@ check_repair_answer(M,Env,Causes,Conflicts,'false'):-
 
 % IAR
 check_repair_answer(_M,_Env,Causes,Conflicts,'IAR'):-
-  check_IAR(Causes,Conflicts,1),!.
+  check_IAR(Causes,Conflicts,IAR),IAR=1,!.
 
 % AR
 check_repair_answer(M,Env,Causes,Conflicts,'AR'):-
-  build_bdd_conflicts(M,Env,Conflicts,ConfSet,BDDCD),
+  build_bdd_conflicts(M,Env,Conflicts,ConfSet,BDDCons),
   build_bdd_not_q(M,Env,Causes,ConfSet,BDDNQ),
-  bdd_not(Env,BDDCD,BDDCons),
   and(Env,BDDNQ,BDDCons,BDDAR),
-  zero(Env,BDDAR).
+  zero(Env,BDDAR),!.
 
 
 % Brave: else if not 0, there is at least one justification true
@@ -923,10 +922,14 @@ check_IAR(Expl,Inc,IAR):-
   flatten(Inc,IncF),
   check_IAR_int(Expl,IncF,IAR).
 
-check_IAR_int([H|T],Inc,IAR):-
-  ((memberchk(A,H),memberchk(A,Inc),!) -> check_IAR_int(T,Inc,IAR) ; IAR=1),!.
+check_IAR_int([],_Inc,0):- !.
 
-check_IAR_int([],_,0).
+check_IAR_int([H|T],Inc,IAR):-
+  member(A,H),
+  member(A,Inc),!,
+  check_IAR_int(T,Inc,IAR).
+
+check_IAR_int(_,_,1):-!.
 
   
 
@@ -994,18 +997,20 @@ build_bdd_conflicts(M,Env, [H|T],Conf,BDD):-
   add_conflicts_to_conf_dict(Env,Conf0,ConfV,Conf).
 
 build_bdd_conflicts(_M,Env,[],conf{},BDD):- !,
-  one(Env,BDD).
+  zero(Env,BDD).
 
 
 bdd_or(M,Env,[X],[VX],BDDX):-
   get_prob_ax(M,X,AxN,0,Prob),!,
   get_var_n(Env,AxN,[],Prob,VX),
-  equality(Env,VX,0,BDDX),!.
+  equality(Env,VX,0,BDDXN),
+  bdd_not(Env,BDDXN,BDDX),!.
 
 bdd_or(M,Env,[H|T],[VH|TV],BDDAnd):-
   get_prob_ax(M,H,AxN,0,Prob),!,  
   get_var_n(Env,AxN,[],Prob,VH),
-  equality(Env,VH,0,BDDH),
+  equality(Env,VH,0,BDDHN),
+  bdd_not(Env,BDDHN,BDDH),
   bdd_or(M,Env,T,TV,BDDT),
   or(Env,BDDH,BDDT,BDDAnd).
   
@@ -1027,7 +1032,8 @@ add_conf(Env,Conf0,A,B,Conf):-
 add_conf_el(Env,Conf0,A,B,Conf):-
   X=Conf0.get(A),
   !,
-  or(Env,X,B,XB),
+  equality(Env,B,0,BDDB),
+  or(Env,X,BDDB,XB),
   Conf = Conf0.put(A,XB).
 
 add_conf_el(Env,Conf0,A,B,Conf):-!,
@@ -1043,17 +1049,26 @@ build_bdd_not_q(M,Env,[H|T],ConfSet,BDDNQ):-
   and(Env,BDDH,BDDT,BDDNQ).
 
 or_causes_conflicts(Env,[],_ConfSet,BDD):-!,
-  zero(Env,BDD).
+  zero(Env,BDD). 
+  % NOTE: this would seem to create problems. If there are no conflicts for a cause, the predicate would return BBD zero, 
+  % which put in AND with the other conflicts could give problems. If there are no conflicts for a cause, however, we are 
+  % in IAR semantics. So the check for IAR and AR could be merged here, but it might be more efficient to check IAR separately. 
+  % If you check IAR separately, you will never end up with any conflicts here.
+
 
 or_causes_conflicts(Env,[H|T],ConfSet,BDD):-
-  get_prob_ax(_M,H,HN,0,Prob),!,
+  get_prob_ax(_M,H,HN,0,Prob),
   get_var_n(Env,HN,[],Prob,VH),
   get_bdd_from_confset(Env,ConfSet,VH,BDDH),!,
   or_causes_conflicts(Env,T,ConfSet,BDDT),
   or(Env,BDDT,BDDH,BDD).
 
-get_bdd_from_confset(_Env,ConfSet,VH,BDDH):-
-  BDDH = ConfSet.VH,!.
+% There is not BDD in conflict set
+or_causes_conflicts(Env,[_|T],ConfSet,BDD):-
+  or_causes_conflicts(Env,T,ConfSet,BDD).
 
-get_bdd_from_confset(Env,_ConfSet,VH,BDDH):-
-  equality(Env,VH,0,BDDH),!.
+get_bdd_from_confset(_Env,ConfSet,VH,BDDH):-
+  BDDH = ConfSet.get(VH),!.
+
+% get_bdd_from_confset(Env,_ConfSet,VH,BDDH):-
+%  equality(Env,VH,0,BDDH),!.
