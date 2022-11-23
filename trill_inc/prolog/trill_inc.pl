@@ -902,7 +902,7 @@ clash(M,C-Ind,Tab,Expl):-
 clash(M,sameIndividual(LS),Tab,Expl):-
   get_abox(Tab,ABox),
   %write('clash 2.a'),nl,
-  find((sameIndividual(LS),Expl1),ABox),
+  findSameIndividual(LS,(sameIndividual(LSABox),Expl1),ABox),
   find((differentIndividuals(LD),Expl2),ABox),
   member(X,LS),
   member(Y,LS),
@@ -914,7 +914,7 @@ clash(M,sameIndividual(LS),Tab,Expl):-
 clash(M,differentIndividuals(LS),Tab,Expl):-
   get_abox(Tab,ABox),
   %write('clash 2.b'),nl,
-  find((differentIndividuals(LS),Expl1),ABox),
+  findDifferentIndividuals(LS,(differentIndividuals(LSABox),Expl1),ABox),
   find((sameIndividual(LD),Expl2),ABox),
   member(X,LS),
   member(Y,LS),
@@ -1016,6 +1016,21 @@ make_expl(M,Ind,S,[H|T],Expl0,ABox,Expl):-
   and_f(M,Expl2,Expl0,Expl1),
   make_expl(M,Ind,S,T,Expl1,ABox,Expl).
 */
+
+findSameIndividual(LS,(sameIndividual(LSABox),Expl),ABox):-
+  find((sameIndividual(LSABox),Expl),ABox),
+  all_members(LS,LSABox).
+
+findDifferentIndividuals(LS,(differentIndividuals(LSABox),Expl),ABox):-
+  find((differentIndividuals(LSABox),Expl),ABox),
+  all_members(LS,LSABox).
+
+all_members(LS,LSABox):-
+  member(H1,LS),
+  member(H2,LS),
+  dif(H1,H2),
+  member(H1,LSABox),
+  member(H2,LSABox),!.
 
 
 :- multifile check_clash/3.
