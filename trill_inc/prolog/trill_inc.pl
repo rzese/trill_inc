@@ -2691,7 +2691,9 @@ compute_prob_ax1([Prob1 | T],Prob):-
 	%get_var_n/5,
         rule_n/1,
         na/2,
-        v/3.
+        v/3,
+        xa/2,
+        xbc/3.
 
 %rule_n(0).
 
@@ -2700,6 +2702,8 @@ compute_prob(M,Expl,Prob):-
   retractall(v(_,_,_)),
   retractall(na(_,_)),
   retractall(rule_n(_)),
+  retractall(xbc(_,_,_)),
+  retractall(xa(_,_)),
   assert(rule_n(0)),
   %findall(1,M:annotationAssertion('http://ml.unife.it/disponte#probability',_,_),NAnnAss),length(NAnnAss,NV),
   get_bdd_environment(M,Env),
