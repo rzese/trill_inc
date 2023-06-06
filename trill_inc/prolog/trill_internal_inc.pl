@@ -907,14 +907,14 @@ check_repair_answer(_M,_Env,Causes,Conflicts,'IAR'):-
   check_IAR(Causes,Conflicts,IAR),IAR=1,!.
 
 % AR
-check_repair_answer(M,Env,Causes,Conflicts,'AR'):- gtrace,
+check_repair_answer(M,Env,Causes,Conflicts,'AR'):- %gtrace,
   build_not_q1(M,Env,Causes,Conflicts,BDDQ1),
   build_not_q2(M,Env,BDDQ2),
-  build_bdd_cons(M,Env,Conflicts,BDDCons),
-  %build_bdd_conflicts(M,Env,Conflicts,ConfSet,BDDCons),
+  %build_bdd_cons(M,Env,Conflicts,BDDCons),
+  build_bdd_conflicts(M,Env,Conflicts,_ConfSet,BDDCons),
   %build_bdd_not_q(M,Env,Causes,ConfSet,BDDNQ),
-  and(Env,BDDQ1,BDDCons,BDDAR0),
-  and(Env,BDDAR0,BDDQ2,BDDAR),
+  and(Env,BDDQ1,BDDQ2,BDDAR0),
+  and(Env,BDDAR0,BDDCons,BDDAR),
   zero(Env,BDDAR),!.
 
 % Brave: else if not 0, there is at least one justification true
@@ -931,22 +931,22 @@ build_not_q1(M,Env,[H|T],Conf,BDD):-
   or_conf(M,Env,H,Conf,BDD1),
   and(Env,BDD0,BDD1,BDD).
 
-or_conf(M,Env,H,[],BDD):-zero(Env,BDD),!.
+or_conf(_M,Env,_H,[],BDD):-zero(Env,BDD),!.
 or_conf(M,Env,H,[HC|T],BDD):-
   member(A,H),
   member(A,HC),!,
   get_prob_ax(_M,H-HC,HN,0,Prob),!,
   get_var_n(Env,HN,[],Prob,VH),
-  assert(M:xbc(VH,H,HC)),
+  assert(xbc(VH,H,HC)),
   equality(Env,VH,0,BDDH),
   or_conf(M,Env,H,T,BDD1),
   or(Env,BDDH,BDD1,BDD).
-or_conf(M,Env,H,[HC|T],BDD):-
+or_conf(M,Env,H,[_HC|T],BDD):-
   or_conf(M,Env,H,T,BDD).
 
 
 build_not_q2(M,Env,BDD):-
-  findall(xbc(A,B,C),M:xbc(A,B,C),L),
+  findall(xbc(A,B,C),xbc(A,B,C),L),
   bnq2(M,Env,L,BDD).
 
 remove_list([], _, []).
@@ -956,14 +956,14 @@ remove_list([X|Tail], L2, [X|Result]):- remove_list(Tail, L2, Result).
 bdd_andor(M,Env,BDDNCB,[X],BDD):-
   get_prob_ax(M,X,AxN,0,Prob),!,
   get_var_n(Env,AxN,[],Prob,VX),
-  assert(M:xa(VX,X)),
+  assert(xa(VX,X)),
   equality(Env,VX,0,BDDX),
   or(Env,BDDNCB,BDDX,BDD),!.
 
 bdd_andor(M,Env,BDDNCB,[H|T],BDDAnd):-
   get_prob_ax(M,H,AxN,0,Prob),!,  
   get_var_n(Env,AxN,[],Prob,VH),
-  assert(M:xa(VH,H)),
+  assert(xa(VH,H)),
   equality(Env,VH,0,BDDH0),
   or(Env,BDDNCB,BDDH0,BDDH),
   bdd_andor(M,Env,BDDNCB,T,BDDT),
@@ -981,11 +981,11 @@ bnq2(M,Env,[xbc(V,C,B)|T],BDD):-
 
 
 build_bdd_cons(M,Env,Conflicts,BDDCons):-
-  findall(xa(V,VH),M:xa(V,VH),L),
+  findall(xa(V,VH),xa(V,VH),L),
   bbc(M,Env,Conflicts,L,BDDCons).
 
 bbc(_,Env,_,[],BDD):- one(Env,BDD),!.
-bbc(M,Env,Conflicts,[xa(V,VH)|T],BDD):-
+bbc(M,Env,Conflicts,[xa(_V,VH)|T],BDD):-
   findall(C,(member(C,Conflicts),member(VH,C)),L),
   bbc1(M,Env,L,BDD0),
   bbc(M,Env,Conflicts,T,BDD1),
