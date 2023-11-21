@@ -200,10 +200,10 @@ prolog:message(iri_not_exists(IRIs)) -->
   [ 'IRIs not existent: ~w' -[IRIs] ].
 
 prolog:message(inconsistent) -->
-  [ 'The KB is locally inconsitent' ].
+  [ 'The KB is inconsitent, but there are worlds where the query is true' ].
 
 prolog:message(completely_inconsistent) -->
-  [ 'The KB is certainly locally inconsistent, I cannot prove the truth of any explanation.' ].
+  [ 'The KB is inconsistent, and there are not any world where the query is true.' ].
 
 prolog:message(inconsistence_expl) -->
   [ 'Inconsistence explanation:' ].
@@ -2729,7 +2729,7 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
   (dif(ProbC,0.0) -> 
     (Prob is ProbQC/ProbC,IncCheck=false)
     ;
-    (Prob is 0.0,IncCheck=true)
+    (Prob is nan,IncCheck=true)
   ),
   clean_environment(M,Env), !.
 /**/

@@ -666,9 +666,9 @@ check_query_placeholder(CP0,CP1):-
 */
 
 
-build_abox(M,Tableau,QueryType,QueryArgs):-
+build_abox(M,Tableau,_QueryType,_QueryArgs):-
   retractall(M:final_abox(_)),
-  find_connected_individuals(M,QueryType,QueryArgs,ConnectedInds),
+  find_connected_individuals(M,it,['inconsistent','kb'],ConnectedInds), % COMMENT: this is to force the use of all the individuals and so to force finding also the justifications for the inconsistency
   ( dif(ConnectedInds,[]) ->
     ( findall((classAssertion(Class,Individual),[[classAssertion(Class,Individual)]-[]]),(member(Individual,ConnectedInds),M:classAssertion(Class,Individual)),LCA),
       findall((propertyAssertion(Property,Subject, Object),[[propertyAssertion(Property,Subject, Object)]-[]]),(member(Subject,ConnectedInds),M:propertyAssertion(Property,Subject, Object),dif('http://www.w3.org/2000/01/rdf-schema#comment',Property)),LPA),

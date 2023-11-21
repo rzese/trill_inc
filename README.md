@@ -67,7 +67,7 @@ To run only `trill`
 
     $ ./test_std.sh
 
-To run only `trill inc`, the system presented in the paper #515
+To run only `trill inc`, the system presented in the paper
 
     $ ./test_inc.sh
    
