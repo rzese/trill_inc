@@ -7,6 +7,6 @@ if [ $# -eq 1 ]
 fi
 
 chmod +x ./test_bundle_std.sh
-./test_std.sh $SET
+./test_bundle_std.sh $SET
 chmod +x ./test_bundle_inc.sh
-./test_inc.sh $SET
+./test_bundle_inc.sh $SET
