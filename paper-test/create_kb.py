@@ -101,8 +101,8 @@ annotationAssertion('disponte:probability',classAssertion(b0,x),literal(\'''' + 
 
 fob.write('''
 	<ClassAssertion>
-        <Class IRI="#x"/>
-        <NamedIndividual IRI="#B0"/>
+        <Class IRI="#B0"/>
+        <NamedIndividual IRI="#x"/>
     	<Annotation>
             <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
             <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">''' + str(p1) + '''</Literal>
