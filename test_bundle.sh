@@ -6,10 +6,6 @@ if [ $# -eq 1 ]
     SET=$1
 fi
 
-chmod +x ./test_trill_std.sh
-./test_std.sh $SET
-chmod +x ./test_trill_inc.sh
-./test_inc.sh $SET
 chmod +x ./test_bundle_std.sh
 ./test_std.sh $SET
 chmod +x ./test_bundle_inc.sh

@@ -7,6 +7,9 @@ then
 elif [[ $1 -eq 3 ]]
 then
   SET=3
+elif [[ $1 -eq 4 ]]
+then
+  SET=4
 fi
 
 
@@ -30,13 +33,13 @@ for J in 2 3 4 5 6 7 8 9 10
 do
   
        cd rc$J
-       rm err_trill.txt
-       rm res_trill.txt
+       mv err_trill.txt ../err_trill_$SET.txt
+       mv res_trill.txt ../res_trill_$SET.txt
        cd ..
 
 done
 
-rm res_std.txt
+#rm res_std.txt
 cd ..
 
 mv paper-test/res_std.csv ./res_std_$SET.csv

@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3">
+    <Prefix name="" IRI="http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="#B0"/>
+    </Declaration>
+
+	<Declaration>
+		<Class IRI='#B1'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#Q1'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#P1'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#B2'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#Q2'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#P2'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#B3'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#Q3'/>
+	</Declaration>
+	<Declaration>
+		<Class IRI='#P3'/>
+	</Declaration>
+
+    <Declaration>
+        <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+    </Declaration>
+
+    	<SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.5165933587247454</Literal>
+            </Annotation>
+            <Class IRI="#B0"/>
+            <ObjectIntersectionOf>
+                <Class IRI="#P1"/>
+                <Class IRI="#Q1"/>
+            </ObjectIntersectionOf>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.2109888233730317</Literal>
+            </Annotation>
+            <Class IRI="#P1"/>
+            <Class IRI="#B1"/>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.192449309196932</Literal>
+            </Annotation>
+            <Class IRI="#Q1"/>
+            <Class IRI="#B1"/>
+        </SubClassOf>
+    
+    	<SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.158986387564543</Literal>
+            </Annotation>
+            <Class IRI="#B1"/>
+            <ObjectIntersectionOf>
+                <Class IRI="#P2"/>
+                <Class IRI="#Q2"/>
+            </ObjectIntersectionOf>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.7501648931662687</Literal>
+            </Annotation>
+            <Class IRI="#P2"/>
+            <Class IRI="#B2"/>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.19202636035163193</Literal>
+            </Annotation>
+            <Class IRI="#Q2"/>
+            <Class IRI="#B2"/>
+        </SubClassOf>
+    
+    	<SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.5854089548744719</Literal>
+            </Annotation>
+            <Class IRI="#B2"/>
+            <ObjectIntersectionOf>
+                <Class IRI="#P3"/>
+                <Class IRI="#Q3"/>
+            </ObjectIntersectionOf>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.37069070950140637</Literal>
+            </Annotation>
+            <Class IRI="#P3"/>
+            <Class IRI="#B3"/>
+        </SubClassOf>
+        <SubClassOf>
+            <Annotation>
+                <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+                <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.8863071607537791</Literal>
+            </Annotation>
+            <Class IRI="#Q3"/>
+            <Class IRI="#B3"/>
+        </SubClassOf>
+    
+	<ClassAssertion>
+        <Class IRI="#x"/>
+        <NamedIndividual IRI="#B0"/>
+    	<Annotation>
+            <AnnotationProperty IRI="https://ai.unife.it/disponte#probability"/>
+            <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">0.5966195848650715</Literal>
+        </Annotation>
+    </ClassAssertion>

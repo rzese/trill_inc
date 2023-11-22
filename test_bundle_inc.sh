@@ -7,6 +7,9 @@ then
 elif [[ $1 -eq 3 ]]
 then
   SET=3
+elif [[ $1 -eq 4 ]]
+then
+  SET=4
 fi
 
 
@@ -16,9 +19,9 @@ for J in 2 3 4 5 6 7 8 9 10
 do
   
        cd rc$J
-       echo "rc$J - trill inc"
-       chmod +x ./testtrill_inc.sh
-       ./testtrill_inc.sh $SET
+       echo "rc$J - bundle inc"
+       chmod +x ./testbundle_inc.sh
+       ./testbundle_inc.sh $SET
        cd ..
 
 done
@@ -30,8 +33,8 @@ for J in 2 3 4 5 6 7 8 9 10
 do
   
        cd rc$J
-       rm err_trill_inc.txt
-       rm res_trill_inc.txt
+       mv err_bundle_inc.txt ../err_bundle_inc_$SET.txt
+       mv res_bundle_inc.txt ../res_bundle_inc_$SET.txt
        cd ..
 
 done
