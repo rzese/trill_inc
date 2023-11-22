@@ -23,7 +23,7 @@ It can be installed with `pack_install/1`. To make comparison with the standard 
 To install only our system, in this folder run the commands:
 
     $ swipl
-    ?- pack_install('trill_inc-1.0.tgz').
+    ?- pack_install('trill_inc-1.2.zip').
 
 Requirements
 -------------
@@ -61,17 +61,33 @@ Running the test of the paper
 -----------------------------
 To run both `trill` and `trill_inc`
 
-    $ ./test_both.sh
+    $ ./test_trill.sh
 
 To run only `trill`
 
-    $ ./test_std.sh
+    $ ./test_trill_std.sh
 
 To run only `trill inc`, the system presented in the paper
 
-    $ ./test_inc.sh
+    $ ./test_trill_inc.sh
+
+If you also have BUNDLE and you would like to test it, to run both `BUNDLE` and `BUNDLE inc`
+
+    $ ./test_bundle.sh
+
+To run only `BUNDLE`
+
+    $ ./test_bundle_std.sh
+
+To run only `BUNDLE inc`, the system presented in the paper
+
+    $ ./test_bundle_inc.sh
+
+To run all the systems above
+
+    $ ./test_both.sh
    
-The files `test_both.sh` and `test_inc.sh` can take as input one argument, which represents the setting to test.
+All the files `test_*.sh` can take as input one argument, which represents the setting to test.
 Therefore, to run the experiment under setting S#1, use the command
 
     $ ./test_both.sh 1
@@ -84,9 +100,12 @@ To run setting S#2
 
     $ ./test_both.sh 2
 
-
 To run setting S#3
 
     $ ./test_both.sh 3
+	
+To run setting S#4
+
+    $ ./test_both.sh 4
 
 
