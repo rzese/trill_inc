@@ -27,19 +27,18 @@ do
 done
 
 chmod +x ./recover_times.sh
-./recover_times.sh
+./recover_times_bundle.sh
 
 for J in 2 3 4 5 6 7 8 9 10
 do
-  
+
        cd rc$J
-       mv err_bundle.txt ../err_bundle_$SET.txt
        mv res_bundle.txt ../res_bundle_$SET.txt
        cd ..
 
 done
 
-#rm res_std.txt
+rm res_std.txt
 cd ..
 
 mv paper-test/res_std.csv ./res_std_$SET.csv

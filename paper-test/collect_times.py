@@ -13,15 +13,26 @@ ctpb=0
 sec=0
 prob=-1
 
+
 with open(namein, "r") as f:
 	lines = f.readlines()
 	for line in lines:
-		if "Time" in line:
+		if "Time =" in line:
 			t = line.split()[2][:-1]
 			tt = tt + float(t)
 			ct = ct +1
-		elif "Prob" in line:
+		elif "Prob =" in line:
 			p = line.split()[2][:-1]
+			if prob==-1:
+				prob = float(p)
+			elif prob!=float(p):
+				print("Error in prob, should be" + str(prob) + ", it is " + p)
+		elif "Execution" in line:
+			t = line.split()[3][:-1]
+			tt = tt + float(t)
+			ct = ct +1
+		elif "Probability" in line:
+			p = line.split()[4][:-1]
 			if prob==-1:
 				prob = float(p)
 			elif prob!=float(p):
