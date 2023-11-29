@@ -893,8 +893,8 @@ build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RepairSem):- !,
   check_repair_semantics(M,Env,Expl,Inc,RepairSem),!.
 
 check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
-  extract_assertions(Expl,Causes),%gtrace,
-  extract_assertions(Inc,Conflicts),%gtrace,
+  extract_assertions(M,Expl,Causes),%gtrace,
+  extract_assertions(M,Inc,Conflicts),%gtrace,
   check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!.
 
 % Brave: BDDQC tells me that, if 0, the query is not Brave-entailed, and so, it is not repair-entailed
@@ -1014,22 +1014,30 @@ check_IAR_int(_,_,1):-!.
 
   
 
-extract_assertions([],[]):-!.
-extract_assertions([H|T],[HA|T1]):-
-  extract_assertions_int(H,HA),
-  extract_assertions(T,T1).
-extract_assertions_int([],[]):-!.
-extract_assertions_int([H|T],[H|T1]):-
-  is_assertion(H),!,
-  extract_assertions_int(T,T1).
-extract_assertions_int([_|T],T1):-!,
-  extract_assertions_int(T,T1).
+extract_assertions(_,[],[]):-!.
+extract_assertions(M,[H|T],[HA|T1]):-
+  extract_assertions_int(M,H,HA),
+  extract_assertions(M,T,T1).
+extract_assertions_int(_,[],[]):-!.
+extract_assertions_int(M,[H|T],[H|T1]):-
+  is_assertion(M,H),!,
+  extract_assertions_int(M,T,T1).
+extract_assertions_int(M,[_|T],T1):-!,
+  extract_assertions_int(M,T,T1).
 
-is_assertion(sameIndividual(_)):-!.
-is_assertion(differentIndividuals(_)):-!.
-is_assertion(classAssertion(_,_)):-!.
-is_assertion(propertyAssertion(_,_,_)):-!.
-is_assertion(negativePropertyAssertion(_,_,_)):-!.
+/*
+is_assertion(_,(_)):-!.
+is_assertion(_,differentIndividuals(_)):-!.
+is_assertion(_,classAssertion(_,_)):-!.
+is_assertion(_,propertyAssertion(_,_,_)):-!.
+is_assertion(_,negativePropertyAssertion(_,_,_)):-!.
+*/
+is_assertion(M,Ax):-
+  M:annotationAssertion('https://ai.unife.it/disponte#probability',Ax,literal(_)),!.
+is_assertion(M,Ax):-
+  M:annotationAssertion('http://ml.unife.it/disponte#probability',Ax,literal(_)),!. % Retro-compatibility
+is_assertion(M,Ax):-
+  M:annotationAssertion('https://sites.google.com/a/unife.it/ml/disponte#probability',Ax,literal(_)), !. % Retro-compatibility
 
 /**/
 

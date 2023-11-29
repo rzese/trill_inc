@@ -2818,8 +2818,10 @@ prob_number(ProbAT,ProbA):-
 
 compute_prob_ax(M,Ax,[Prob,ProbN]):-
   findall(ProbA,(M:annotationAssertion('https://sites.google.com/a/unife.it/ml/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsOld), % Retro-compatibility
-  findall(ProbA,(M:annotationAssertion('http://ml.unife.it/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsNew),
-  append(ProbsNew, ProbsOld, Probs),
+  findall(ProbA,(M:annotationAssertion('http://ml.unife.it/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsNewML),
+  findall(ProbA,(M:annotationAssertion('https://ai.unife.it/disponte#probability',Ax,literal(ProbAT)),prob_number(ProbAT,ProbA)),ProbsNew),
+  append(ProbsNewML, ProbsOld, Probs0),
+  append(ProbsNew, Probs0, Probs),
   compute_prob_ax1(Probs,Prob),!,
   ProbN is 1-Prob,!.
 

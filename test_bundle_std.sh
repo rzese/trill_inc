@@ -33,7 +33,7 @@ for J in 2 3 4 5 6 7 8 9 10
 do
 
        cd rc$J
-       mv res_bundle.txt ../res_bundle_$SET.txt
+       mv res_bundle.txt ../res_bundle_$J-$SET.txt
        cd ..
 
 done
@@ -41,4 +41,4 @@ done
 rm res_std.txt
 cd ..
 
-mv paper-test/res_std.csv ./res_std_$SET.csv
+mv paper-test/res_std.csv ./res_bundle_std_$SET.csv

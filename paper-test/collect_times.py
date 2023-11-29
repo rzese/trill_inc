@@ -34,7 +34,7 @@ with open(namein, "r") as f:
 			elif prob!=float(p):
 				print("Error in prob, should be" + str(prob) + ", it is " + p)
 		elif "Execution" in line:
-			t = float(line.split()[3][:-1])
+			t = float(line.split()[3])
 			tt.append(t)
 			ct = ct +1
 			if t < min:
@@ -42,7 +42,7 @@ with open(namein, "r") as f:
 			if t > max:
 				max = t
 		elif "Probability" in line:
-			p = line.split()[4][:-1]
+			p = line.split()[4]
 			if prob==-1:
 				prob = float(p)
 			elif prob!=float(p):

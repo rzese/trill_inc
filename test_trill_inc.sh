@@ -33,8 +33,8 @@ for J in 2 3 4 5 6 7 8 9 10
 do
   
        cd rc$J
-       mv err_trill_inc.txt ../err_trill_inc_$SET.txt
-       mv res_trill_inc.txt ../res_trill_inc_$SET.txt
+       mv err_trill_inc.txt ../err_trill_inc_$J-$SET.txt
+       mv res_trill_inc.txt ../res_trill_inc_$J-$SET.txt
        cd ..
 
 done
@@ -42,4 +42,4 @@ done
 rm res_inc.txt
 cd ..
 
-mv paper-test/res_inc.csv ./res_inc_$SET.csv
+mv paper-test/res_inc.csv ./res_trill_inc_$SET.csv
