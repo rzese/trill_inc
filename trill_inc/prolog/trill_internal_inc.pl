@@ -905,6 +905,9 @@ check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
   extract_assertions(M,Inc,Conflicts),%gtrace,
   check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!.
 
+check_repair_answer(_M,_Env,Causes,[],'IAR'):-
+  dif(Causes,[]),!.
+
 % Brave: BDDQC tells me that, if 0, the query is not Brave-entailed, and so, it is not repair-entailed
 check_repair_answer(M,Env,Causes,Conflicts,'false'):-
   build_bdd_inc(M,Env,Causes,Conflicts,0,BDDQCI,_BDDCI),
@@ -1025,6 +1028,9 @@ check_IAR_int(_,_,1):-!.
 extract_assertions(_,[],[]):-!.
 extract_assertions(M,[H|T],[HA|T1]):-
   extract_assertions_int(M,H,HA),
+  dif(HA,[]),!,
+  extract_assertions(M,T,T1).
+extract_assertions(M,[_|T],T1):-
   extract_assertions(M,T,T1).
 extract_assertions_int(_,[],[]):-!.
 extract_assertions_int(M,[H|T],[H|T1]):-
