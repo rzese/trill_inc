@@ -2724,6 +2724,7 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
   get_bdd_environment(M,Env),
   build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,Rep),
   print_message(information,repairs(Rep)),
+  StartCP is cputime,
   ret_prob(Env,BDDQC,ProbQC),
   ret_prob(Env,BDDC,ProbC),
   (dif(ProbC,0.0) -> 
@@ -2731,6 +2732,9 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
     ;
     (Prob is nan,IncCheck=true)
   ),
+  EndCP is cputime,
+  TimeCP is EndCP - StartCP,
+  write('Prob comp: '),writeln(TimeCP),
   clean_environment(M,Env), !.
 /**/
 % COMMENT: compute repair semantics

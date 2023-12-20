@@ -889,8 +889,16 @@ build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDNQC,BDDC):- !,
 */
 
 build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RepairSem):- !,
+  StartCP is cputime,
   build_bdd_inc(M,Env,Expl,Inc,1,BDDQC,BDDC),
-  check_repair_semantics(M,Env,Expl,Inc,RepairSem),!.
+  EndCP is cputime,
+  TimeCP is EndCP - StartCP,
+  write('BDD build: '),writeln(TimeCP),
+  StartRS is cputime,
+  check_repair_semantics(M,Env,Expl,Inc,RepairSem),!,
+  EndRS is cputime,
+  TimeRS is EndRS - StartRS,
+  write('Repair: '),writeln(TimeRS).
 
 check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
   extract_assertions(M,Expl,Causes),%gtrace,

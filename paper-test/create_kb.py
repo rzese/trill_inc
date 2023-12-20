@@ -147,7 +147,7 @@ cat  rc''' + str(n) + '''.pl >> temp.pl
 if [[ $1 -eq 2 ]]
 then
   echo "disjointClasses([b0,b1])." >> temp.pl
-  echo "annotationAssertion('disponte:probability',disjointClasses([b0,b1]).,literal('0.6'))." >> temp.pl
+  echo "annotationAssertion('disponte:probability',disjointClasses([b0,b1]),literal('0.6'))." >> temp.pl
 elif [[ $1 -eq 3 ]]
 then
   echo "disjointClasses([b''' + str(n - 1) + ''',b''' + str(n) + '''])." >> temp.pl
@@ -161,7 +161,9 @@ then
   echo "subClassOf(c02,c1)." >> temp.pl
   echo "annotationAssertion('disponte:probability',subClassOf(c02,c1),literal('0.4'))." >> temp.pl
   echo "classAssertion(c0,x)." >> temp.pl
-  echo "annotationAssertion('disponte:probability',classAssertion(c0,x),literal('0.6'))." >> temp.pl
+  echo "annotationAssertion('disponte:probability',classAssertion(c0,x),literal('0.5'))." >> temp.pl
+  echo "disjointClasses([b''' + str(n - 1) + ''',b''' + str(n) + '''])." >> temp.pl
+  echo "annotationAssertion('disponte:probability',disjointClasses([b''' + str(n - 1) + ''',b''' + str(n) + ''']),literal('0.6'))." >> temp.pl
 fi
 
 >res_trill_inc.txt
@@ -194,9 +196,11 @@ echo "</Ontology>" >> temp.owl
 for X in $(seq 10)
 do
 	echo $X
-	../bundle.sh -r pellet -m glass -t 10m --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#B''' + str(
+	../bundle.sh -r pellet -m owlexp -t 10m --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#B''' + str(
     n) + '''" file:temp.owl &>> res_bundle.txt
 done
+
+rm temp.owl
 ''')
 fos.close()
 
@@ -213,7 +217,7 @@ then
   echo "		<Class IRI='#B1'/>" >> temp.owl
   echo "		<Annotation>" >> temp.owl
   echo "		    <AnnotationProperty IRI='https://ai.unife.it/disponte#probability'/>" >> temp.owl
-  echo "		    <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.2</Literal>" >> temp.owl
+  echo "		    <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.6</Literal>" >> temp.owl
   echo "		</Annotation>" >> temp.owl
   echo "	</DisjointClasses>" >> temp.owl
 elif [[ $1 -eq 3 ]]
@@ -223,7 +227,7 @@ then
   echo "		<Class IRI='#B''' + str(n) + ''''/>" >> temp.owl
   echo "		<Annotation>" >> temp.owl
   echo "		    <AnnotationProperty IRI='https://ai.unife.it/disponte#probability'/>" >> temp.owl
-  echo "		    <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.3</Literal>" >> temp.owl
+  echo "		    <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.6</Literal>" >> temp.owl
   echo "		</Annotation>" >> temp.owl
   echo "	</DisjointClasses>" >> temp.owl
 elif [[ $1 -eq 4 ]]
@@ -260,9 +264,17 @@ then
   echo "        <NamedIndividual IRI='#x'/>" >> temp.owl
   echo "    	<Annotation>" >> temp.owl
   echo "            <AnnotationProperty IRI='https://ai.unife.it/disponte#probability'/>" >> temp.owl
-  echo "            <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.6</Literal>" >> temp.owl
+  echo "            <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.5</Literal>" >> temp.owl
   echo "        </Annotation>" >> temp.owl
   echo "    </ClassAssertion>" >> temp.owl
+  echo "	<DisjointClasses>" >> temp.owl
+  echo "    	<Class IRI='#B''' + str(n - 1) + ''''/>" >> temp.owl
+  echo "		<Class IRI='#B''' + str(n) + ''''/>" >> temp.owl
+  echo "		<Annotation>" >> temp.owl
+  echo "		    <AnnotationProperty IRI='https://ai.unife.it/disponte#probability'/>" >> temp.owl
+  echo "		    <Literal datatypeIRI='http://www.w3.org/2001/XMLSchema#decimal'>0.6</Literal>" >> temp.owl
+  echo "		</Annotation>" >> temp.owl
+  echo "	</DisjointClasses>" >> temp.owl
 fi
 echo "</Ontology>" >> temp.owl
 
@@ -273,11 +285,13 @@ do
 	echo $X
 	if [[ $1 -eq 4 ]]
 	then
-	  ../bundle.sh -r pellet -m glass -t 10m -wi --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#C1" file:temp.owl &>> res_bundle_inc.txt
+	  ../bundle.sh -r pellet -m owlexp -t 10m -wi --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#C1" file:temp.owl &>> res_bundle_inc.txt
 	else
-	  ../bundle.sh -r pellet -m glass -t 10m -wi --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#B''' + str(n) + '''" file:temp.owl &>> res_bundle_inc.txt
+	  ../bundle.sh -r pellet -m owlexp -t 10m -wi --instance "http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#x","http://www.semanticweb.org/riccardo/ontologies/2017/5/untitled-ontology-3#B''' + str(n) + '''" file:temp.owl &>> res_bundle_inc.txt
 	fi
 done
+
+rm temp.owl
 ''')
 fos.close()
 

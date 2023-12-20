@@ -26,7 +26,7 @@ do
 
 done
 
-chmod +x ./recover_times.sh
+chmod +x ./recover_times_bundle.sh
 ./recover_times_bundle.sh
 
 for J in 2 3 4 5 6 7 8 9 10
@@ -38,7 +38,7 @@ do
 
 done
 
-rm res_std.txt
 cd ..
 
+mv paper-test/res_std.txt ./res_bundle_std_$SET.txt
 mv paper-test/res_std.csv ./res_bundle_std_$SET.csv

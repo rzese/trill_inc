@@ -39,7 +39,8 @@ do
 
 done
 
-rm res_inc.txt
+
 cd ..
 
+mv paper-test/res_inc.txt ./res_trill_inc_$SET.txt
 mv paper-test/res_inc.csv ./res_trill_inc_$SET.csv
