@@ -9,9 +9,9 @@
 % AR
 ?- prob_instanceOf(univEmpl,a,Prob).
 % Brave
-?- prob_instanceOf(dott,a,Prob).
+?- prob_instanceOf(phd,a,Prob).
 % false
-?- prob_instanceOf(sem,a,Prob).
+?- prob_instanceOf(lecturer,a,Prob).
 
 */
 

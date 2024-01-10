@@ -876,7 +876,7 @@ build_bdd_inc(M,Env,Expl,Inc,P,BDDQC,BDDC):- !,
   build_bdd(M,Env,Expl,P,BDDQ), % BDD query's explanations
   build_bdd(M,Env,Inc,P,BDDInc), % BDD inconsistency's explanations
   bdd_not(Env,BDDInc,BDDC), % BDD consistency's explanations
-  and(Env,BDDQ,BDDC,BDDQC). % BDD query and consistency's explanations
+  and(Env,BDDQ,BDDC,BDDQC),!. % BDD query and consistency's explanations
 
 /*
 build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDNQC,BDDC):- !,
@@ -1011,18 +1011,24 @@ bbc1(M,Env,[H|T],BDD):-
 % ====================================
 
 check_IAR(Expl,Inc,IAR):-
-  flatten(Inc,IncF),
+  flatten(Inc,IncF),!,
   check_IAR_int(Expl,IncF,IAR).
 
 check_IAR_int([],_Inc,0):- !.
 
 check_IAR_int([H|T],Inc,IAR):-
-  member(A,H),
-  member(A,Inc),!,
+  common_member(H,Inc),!,
   check_IAR_int(T,Inc,IAR).
 
 check_IAR_int(_,_,1):-!.
 
+list_memberd_t([]    ,_,false) :- !.
+list_memberd_t([Y|Ys],X,Truth) :-
+   X=Y -> Truth=true ; list_memberd_t(Ys,X,Truth).
+memberd_t(X,Xs,Truth) :- list_memberd_t(Xs,X,Truth),!.
+
+common_member([X|Xs],Ys) :-
+  memberd_t(X,Ys,true) -> true ; common_member(Xs,Ys).
   
 
 extract_assertions(_,[],[]):-!.
