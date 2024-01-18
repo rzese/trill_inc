@@ -23,7 +23,7 @@ It can be installed with `pack_install/1`. To make comparison with the standard 
 To install only our system, in this folder run the commands:
 
     $ swipl
-    ?- pack_install('trill_inc-1.4.zip').
+    ?- pack_install('trill_inc-1.5.zip').
 
 Requirements
 -------------
