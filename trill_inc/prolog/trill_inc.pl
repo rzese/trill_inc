@@ -247,7 +247,8 @@ execute_query(M,QueryType,QueryArgsNC,ExplOut,QueryOptions):-
   ( query_option(QueryOptions,max_expl,bt) -> ExplIncP = ExplInc.put(expl,[Expl]).put(incons,[Inc]) ; ExplIncP = ExplInc),
   ( query_option(QueryOptions,return_prob,Prob) ->
     (
-      compute_prob_and_close(M,ExplIncP,Prob,IncCheck),
+      (query_option(QueryOptions,return_repair,RetRepair0) -> RetRepair=RetRepair0;RetRepair=false),
+      compute_prob_and_close(M,ExplIncP,Prob,RetRepair,IncCheck),
       (dif(IncCheck,false) -> print_message(warning,completely_inconsistent) ; true),
       ( query_option(QueryOptions,return_incons_expl,Inc) -> true ; true) % does nothing, just unifies with the variable in the option
     )
@@ -719,7 +720,7 @@ inconsistent_theory:-
  * returns the probability of the instantiation of the individual to the given class.
  */
 prob_instanceOf(M:Class,Ind,Prob):-
-  instanceOf(M:Class,Ind,_,[return_prob(Prob)]).
+  instanceOf(M:Class,Ind,_,[return_prob(Prob),return_repair(true)]).
 
 /**
  * prob_property_value(:Prop:property_name,++Ind1:individual_name,++Ind2:individual_name,--Prob:double) is det
@@ -728,7 +729,7 @@ prob_instanceOf(M:Class,Ind,Prob):-
  * and returns the probability of the fact Ind1 is related with Ind2 via Prop.
  */
 prob_property_value(M:Prop, Ind1, Ind2,Prob):-
-  property_value(M:Prop, Ind1, Ind2,_,[return_prob(Prob)]).
+  property_value(M:Prop, Ind1, Ind2,_,[return_prob(Prob),return_repair(true)]).
 
 /**
  * prob_sub_class(:Class:concept_description,++SupClass:class_name,--Prob:double) is det
@@ -738,7 +739,7 @@ prob_property_value(M:Prop, Ind1, Ind2,Prob):-
  * the probability of the subclass relation between Class and SupClass.
  */
 prob_sub_class(M:Class,SupClass,Prob):-
-  sub_class(M:Class,SupClass,_,[return_prob(Prob)]).
+  sub_class(M:Class,SupClass,_,[return_prob(Prob),return_repair(true)]).
 
 /**
  * prob_unsat(:Concept:concept_description,--Prob:double) is det
@@ -748,7 +749,7 @@ prob_sub_class(M:Class,SupClass,Prob):-
  * of the concept.
  */
 prob_unsat(M:Concept,Prob):-
-  unsat(M:Concept,_,[return_prob(Prob)]).
+  unsat(M:Concept,_,[return_prob(Prob),return_repair(true)]).
 
 /**
  * prob_inconsistent_theory(:Prob:double) is det
@@ -756,7 +757,7 @@ prob_unsat(M:Concept,Prob):-
  * If the knowledge base is inconsistent, this predicate returns the probability of the inconsistency.
  */
 prob_inconsistent_theory(M:Prob):-
-  inconsistent_theory(M:_,[return_prob(Prob)]).
+  inconsistent_theory(M:_,[return_prob(Prob),return_repair(true)]).
 
 /***********
   Utilities for queries
@@ -2713,7 +2714,7 @@ compute_prob(M,Expl,Prob):-
 
 % COMMENT: for query with inconsistency P1(Q) = P(Q|cons) = P(Q,cons)/P(cons)
 /**/
-compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
+compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,RetRepair,IncCheck):-
   retractall(v(_,_,_)),
   retractall(na(_,_)),
   retractall(rule_n(_)),
@@ -2722,8 +2723,8 @@ compute_prob_inc(M,expl{expl:Expl,incons:Inc},Prob,IncCheck):-
   assert(rule_n(0)),
   %findall(1,M:annotationAssertion('http://ml.unife.it/disponte#probability',_,_),NAnnAss),length(NAnnAss,NV),
   get_bdd_environment(M,Env),
-  build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,Rep),
-  print_message(information,repairs(Rep)),
+  build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RetRepair,Rep),
+  (RetRepair=true -> print_message(information,repairs(Rep)) ; true),
   StartCP is cputime,
   ret_prob(Env,BDDQC,ProbQC),
   ret_prob(Env,BDDC,ProbC),

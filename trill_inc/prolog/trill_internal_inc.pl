@@ -82,14 +82,14 @@ all_inconsistent_theory_int(M:Exps):-
 % COMMENT: changes to handle justifications for query and inconsistency
 /**/
 % if there is not inconsistency, perform classical probability computation
-compute_prob_and_close(M,expl{expl:Exps,incons:[[]]},Prob,false):- !,
+compute_prob_and_close(M,expl{expl:Exps,incons:[[]]},Prob,_,false):- !,
   compute_prob(M,Exps,Prob),!.
 % if there is not inconsistency, perform classical probability computation
-compute_prob_and_close(M,expl{expl:[[]],incons:Exps},Prob,false):- !,
+compute_prob_and_close(M,expl{expl:[[]],incons:Exps},Prob,_,false):- !,
   compute_prob(M,Exps,Prob),!.
 
-compute_prob_and_close(M,Exps,Prob,Inc):-
-  compute_prob_inc(M,Exps,Prob,Inc),!.
+compute_prob_and_close(M,Exps,Prob,RetRepair,Inc):-
+  compute_prob_inc(M,Exps,Prob,RetRepair,Inc),!.
 /**/
 
 % COMMENT: minor changes to handle justifications for query and inconsistency
@@ -888,22 +888,22 @@ build_bdd_inc(M,Env,Expl,Inc,BDDQC,BDDNQC,BDDC):- !,
   and(Env,BDDNQ,BDDC,BDDNQC). % BDD of query not true in consistent worlds
 */
 
-build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RepairSem):- !,
+build_bdd_inc_repair(M,Env,Expl,Inc,BDDQC,BDDC,RetRepair,RepairSem):- !,
   StartCP is cputime,
   build_bdd_inc(M,Env,Expl,Inc,1,BDDQC,BDDC),
   EndCP is cputime,
   TimeCP is EndCP - StartCP,
   write('BDD build: '),writeln(TimeCP),
+  (dif(RetRepair,false) -> check_repair_semantics(M,Env,Expl,Inc,RepairSem),! ; RepairSem = 'undef'),!.
+
+check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
   StartRS is cputime,
-  check_repair_semantics(M,Env,Expl,Inc,RepairSem),!,
+  extract_assertions(M,Expl,Causes),%gtrace,
+  extract_assertions(M,Inc,Conflicts),%gtrace,
+  check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!,
   EndRS is cputime,
   TimeRS is EndRS - StartRS,
   write('Repair: '),writeln(TimeRS).
-
-check_repair_semantics(M,Env,Expl,Inc,RepairSem):-
-  extract_assertions(M,Expl,Causes),%gtrace,
-  extract_assertions(M,Inc,Conflicts),%gtrace,
-  check_repair_answer(M,Env,Causes,Conflicts,RepairSem),!.
 
 check_repair_answer(_M,_Env,Causes,[],'IAR'):-
   dif(Causes,[]),!.
